@@ -1,6 +1,6 @@
 ---
  - name: Pull the mailcow repo
-   git: repo='https://github.com/mailcow/mailcow-dockerized' dest="{{docker_dir}}" force=yes
+   git: repo='https://github.com/hossanrose/mailcow-dockerized' dest="{{docker_dir}}" force=yes
 
  - name: Copy the conf file
    template: src=mailcow.j2 dest={{docker_dir}}/mailcow.conf backup=yes 
