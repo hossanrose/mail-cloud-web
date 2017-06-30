@@ -1,0 +1,15 @@
+---
+ - name: restart web
+   shell: docker-compose restart acme-mailcow nginx-mailcow  
+   args: 
+     chdir: "{{docker_dir}}"
+   become: true
+   become_user: root
+
+ - name: docker up
+   shell: docker-compose up -d
+   args:
+     chdir: "{{docker_dir}}"
+   become: yes
+   become_user: root
+

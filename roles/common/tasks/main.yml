@@ -1,0 +1,45 @@
+---
+ - name: Update apt
+   apt: update_cache=yes
+   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+   become: true
+   become_user: root
+
+ - name: ntp is installed
+   apt: name=ntp state=present update_cache=yes
+   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+   become: true
+   become_user: root
+
+ - name: ntp is installed
+   yum: name=ntp state=present
+   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
+   become: true
+   become_user: root
+
+ - name: Configure timezone
+   shell: timedatectl set-timezone {{TZ}}
+   become: true
+   become_user: root
+
+ - name: update hostname from inventory
+   hostname: name={{ inventory_hostname }}
+   become: true
+   become_user: root
+
+ - name: Ensure managment user is added
+   user: name={{user}} comment="Managment User" shell=/bin/bash
+   become: true
+   become_user: root
+
+ - name: Adding managment user to sudoers file
+   lineinfile: dest=/etc/sudoers regexp='^{{user}}' line='{{user}} ALL=(ALL) NOPASSWD:ALL' state=present backup=yes
+   become: true
+   become_user: root
+
+ - name: Ensure public key is copied to the server
+   authorized_key: user={{ item.name }} key="{{ item.key }}"
+   with_items: "{{ssh_keys}}"
+   become: true
+   become_user: root
+

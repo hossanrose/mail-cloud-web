@@ -1,0 +1,46 @@
+---
+ - name: Insert the nextcloud docker
+   blockinfile:
+     dest: "{{docker_dir}}/docker-compose.yml"
+     marker: "# {mark} ANSIBLE MANAGED BLOCK nextcloud docker"
+     insertafter: "^services:"
+     block: |2
+
+           nextcloud:  
+             build: ./data/Dockerfiles/nextcloud
+             depends_on:
+               - mysql-mailcow 
+             volumes:
+               - my-nextcloud:/var/www/html
+             restart: always
+             networks:
+               mailcow-network:
+                 aliases:
+                   - mynextcloud
+   notify: 
+     - docker up
+    
+ - name: Insert the nextcloud docker volume
+   blockinfile:
+     dest: "{{docker_dir}}/docker-compose.yml"
+     marker: "# {mark} ANSIBLE MANAGED BLOCK nextcloud docker volume"
+     insertafter: "^volumes:"
+     block: |2
+         my-nextcloud:
+   notify: 
+     - docker up
+
+ - name: Create next cloud directory
+   file: path="{{docker_dir}}/data/Dockerfiles/nextcloud" state=directory owner=techie group=techie
+   become: true
+   become_user: root
+   
+ - name: Copy the custom dockerfile
+   copy: src=Dockerfile.j2 dest="{{docker_dir}}/data/Dockerfiles/nextcloud/Dockerfile" owner=techie group=techie
+   notify: 
+     - docker up
+
+ - name: Copy the nginx conf file
+   template: src=cloud.j2 dest="{{docker_dir}}/data/conf/nginx/cloud.{{DOMAIN}}.conf" owner=techie group=techie 
+   notify: 
+     - restart web 

@@ -1,0 +1,16 @@
+---
+- hosts: mail-cloud
+  remote_user: techie
+  vars:
+    TZ: Asia/Kolkata
+    user: techie
+    HTTP_Port: 80
+    HTTPS_Port: 443
+    base_dir: myapps
+    docker_dir: "/home/{{ansible_user}}/{{base_dir}}"
+
+  roles:
+    - common
+    - docker   
+    - mailcow
+    - nextcloud

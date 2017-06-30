@@ -1,0 +1,55 @@
+---
+ - name: Pull the mailcow repo
+   git: repo='https://github.com/mailcow/mailcow-dockerized' dest="{{docker_dir}}" force=yes
+
+ - name: Copy the conf file
+   template: src=mailcow.j2 dest={{docker_dir}}/mailcow.conf backup=yes 
+   notify:
+    - docker up
+
+# - name: Random dbpass 
+#   shell: </dev/urandom tr -dc A-Za-z0-9 | head -c 28 
+#   register: db_pass
+
+# - name: Set db password
+#   lineinfile: dest={{docker_dir}}/mailcow.conf regexp="^DBPASS=\$\(</dev/urandom" line='DBPASS={{db_pass.stdout}}' state=present backup=yes backrefs=yes
+#   tags:
+#    - reset
+
+# - name: Random dbrootpass 
+#   shell: </dev/urandom tr -dc A-Za-z0-9 | head -c 28 
+#   register: root_pass
+
+# - name: Set root password
+#   lineinfile: dest={{docker_dir}}/mailcow.conf regexp="^DBROOT=\$\(</dev/urandom" line='DBROOT={{root_pass.stdout}}' state=present backup=yes backrefs=yes
+#   tags:
+#    - reset
+
+ - name: Check ports
+   shell: netstat -tulpn | grep -E -w '25|80|110|143|443|465|587|993|995' | grep -v docker-proxy
+   register: ports
+   become: true
+   become_user: root
+   ignore_errors: yes
+
+ - debug:
+    var: ports
+
+ - name: Check if any of these ports is listening 25|80|110|143|443|465|587|993|995
+   meta: end_play
+   when: ports.stdout != ""
+
+ - name: get files in ssl dir
+   shell   : ls {{docker_dir}}/data/assets/ssl-example/*
+   register: ssl_files
+
+ - name: Create ssl directory
+   file: path={{docker_dir}}/data/assets/ssl state=directory owner=techie group=techie
+   become: true
+   become_user: root
+
+ - name: Copy the ssl files
+   copy: src="{{item}}" dest={{docker_dir}}/data/assets/ssl/ remote_src=True force=no
+   with_items: "{{ ssl_files.stdout_lines }}"
+   notify:
+     - restart web

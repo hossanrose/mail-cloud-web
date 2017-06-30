@@ -1,0 +1,38 @@
+---
+ - name: Add Https support for repo 
+   apt: name={{item}} state=present update_cache=yes
+   become: true
+   become_user: root
+   with_items:
+     -  apt-transport-https
+     - ca-certificates
+     - curl
+     - gnupg2
+     - software-properties-common
+     - python-pip
+     - git
+
+ - name: Add ansible repo 
+   apt_repository: 
+    repo: deb https://download.docker.com/linux/debian jessie stable 
+    state: present 
+   become: true
+   become_user: root
+ 
+ - name: Install Docker 
+   apt: name=docker-ce state=present update_cache=yes
+   become: true
+   become_user: root
+
+ - name: Upgrade pip
+   pip: name={{item}} state=latest
+   become: true
+   become_user: root
+   with_items:
+     - pip
+     - docker-compose
+
+ - name: Start docker and enable it
+   systemd: name=docker state=started enabled=yes
+   become: true
+   become_user: root
