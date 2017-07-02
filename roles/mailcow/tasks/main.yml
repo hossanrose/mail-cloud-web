@@ -4,8 +4,6 @@
 
  - name: Copy the conf file
    template: src=mailcow.j2 dest={{docker_dir}}/mailcow.conf backup=yes 
-   notify:
-    - docker up
 
 # - name: Random dbpass 
 #   shell: </dev/urandom tr -dc A-Za-z0-9 | head -c 28 
@@ -53,3 +51,10 @@
    with_items: "{{ ssl_files.stdout_lines }}"
    notify:
      - restart web
+
+ - name: Docker up
+   shell: docker-compose up -d
+   args:
+     chdir: "{{docker_dir}}"
+   become: true
+   become_user: root

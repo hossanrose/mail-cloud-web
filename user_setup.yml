@@ -3,6 +3,7 @@
   remote_user: root
   vars:
     user: techie
+    UID: 1100
 
   roles:
     - useradd

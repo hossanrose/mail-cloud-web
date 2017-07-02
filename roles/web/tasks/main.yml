@@ -1,0 +1,44 @@
+---
+ - name: Insert the myphpfpm docker
+   blockinfile:
+     dest: "{{docker_dir}}/docker-compose.yml"
+     marker: "# {mark} ANSIBLE MANAGED BLOCK phpfpm docker"
+     insertafter: "^services:"
+     block: |2
+
+           phpfpm:  
+             build: ./data/Dockerfiles/myphpfpm
+             depends_on:
+               - mysql-mailcow 
+             volumes:
+               - ./data/web/{{DOMAIN}}:/web/{{DOMAIN}}
+               - /etc/localtime:/etc/localtime
+             ports:
+               - 9000:9000
+             restart: always
+             networks:
+               mailcow-network:
+                 aliases:
+                   - myphpfpm
+   notify: 
+     - docker up
+    
+ - name: Create myphpfpm  directory
+   file: path="{{docker_dir}}/data/Dockerfiles/myphpfpm" state=directory owner=techie group=techie
+   become: true
+   become_user: root
+
+ - name: Create web directory
+   file: path="{{docker_dir}}/data/web/{{DOMAIN}}" state=directory owner=techie group=techie
+   become: true
+   become_user: root
+   
+ - name: Copy the custom dockerfile
+   template: src=Dockerfile.j2 dest="{{docker_dir}}/data/Dockerfiles/myphpfpm/Dockerfile" owner=techie group=techie
+   notify: 
+     - docker up
+
+ - name: Copy the nginx conf file
+   template: src=domain.j2 dest="{{docker_dir}}/data/conf/nginx/{{DOMAIN}}.conf" owner=techie group=techie 
+   notify: 
+     - restart web 

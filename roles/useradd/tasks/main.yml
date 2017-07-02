@@ -3,7 +3,7 @@
    apt: name=sudo state=present update_cache=yes
 
  - name: Ensure managment user is added
-   user: name={{user}} comment="Managment User" shell=/bin/bash
+   user: name={{user}} comment="Managment User" uid="{{UID}}" shell=/bin/bash
 
  - name: Adding managment user to sudoers file
    lineinfile: dest=/etc/sudoers regexp='^{{user}}' line='{{user}} ALL=(ALL) NOPASSWD:ALL' state=present backup=yes

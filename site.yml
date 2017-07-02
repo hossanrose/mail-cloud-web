@@ -8,9 +8,11 @@
     HTTPS_Port: 443
     base_dir: myapps
     docker_dir: "/home/{{ansible_user}}/{{base_dir}}"
+    UID: 1100
 
   roles:
     - common
     - docker   
     - mailcow
     - nextcloud
+    - web

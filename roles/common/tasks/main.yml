@@ -28,7 +28,7 @@
    become_user: root
 
  - name: Ensure managment user is added
-   user: name={{user}} comment="Managment User" shell=/bin/bash
+   user: name={{user}} comment="Managment User" uid="{{UID}}" shell=/bin/bash
    become: true
    become_user: root
 
